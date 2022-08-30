@@ -61,7 +61,7 @@ touch /opt/letsencryptCA
 
 # создать файл сертификата по инструкции: https://help.socialit.ru/knowledge_base/articles/ustanovka-sertifikata-letsencrypt-na-zimbra-server-38
 
-certbot -d mo-mail.swifttechnical.ru -d autoconfig.swifttechnical.ru -d cab.swifttechnical.ru -d imap.swifttechnical.ru -d mail.swifttechnical.ru -d psnapi.swifttechnical.ru -d smtp.swifttechnical.ru -d pbm.swifttechnical.ru --manual --preferred-challenges dns certonly
+certbot -d *.swifttechnical.ru --manual --preferred-challenges dns certonly
 yum install bind-utils
 
 cp /etc/letsencrypt/live/mo-mail.swifttechnical.ru/privkey.pem /home/socialit/install_MyOffice_PSN/certificates/server.key
