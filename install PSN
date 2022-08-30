@@ -1,0 +1,105 @@
+KEJ!ZQy6
+hostnamectl set-hostname mo-mail.swifttechnical.ru
+
+(убрать запрос пароля судо у socialit)
+sudo visudo
+## Allow root to run any commands anywhere
+root    ALL=(ALL)       ALL
+#убрать запрос пароля судо
+socialit ALL=(ALL) NOPASSWD: ALL
+## Allows members of the 'sys' group to run networking, software,
+
+sudo usermod -aG wheel socialit
+
+#проверить /etc/hosts
+10.130.233.103	mo-mail.swifttechnical.ru
+10.130.233.103	pbm.swifttechnical.ru
+
+#ssh ключи
+ssh-keygen
+ssh-copy-id socialit@mo-mail.swifttechnical.ru
+ssh-copy-id root@mo-mail.swifttechnical.ru
+
+sudo yum update
+sudo yum install mc
+#Установка python3 (версии не ниже 3.6), python3pip, rsync
+sudo yum install epel-release
+sudo yum install python36
+sudo yum install rsync
+
+#Установка ansible 4.4
+pip3 install --upgrade pip
+python3 -m pip install --user ansible==4.4
+yum install nano
+
+#Отключение SELinux
+/etc/selinux/config
+SELINUX=permissive
+sudo shutdown -r now
+
+#Скачивание дистрибутива почты
+sudo yum install wget
+wget --user=professional --password=yrn56iwn --no-check-certificate https://clients-distrs.myoffice.ru/professional/MyOffice_PSN_SRV_2.1.1.tar.gz
+
+mkdir install_MyOffice_PSN
+tar xvzf MyOffice_PSN_SRV_2.1.1.tar.gz -C install_MyOffice_PSN
+
+#Firewall
+systemctl stop firewalld
+systemctl disable firewalld
+
+#ssl сертификаты
+sudo yum install epel-release
+sudo yum install snapd
+sudo systemctl enable --now snapd.socket
+sudo snap install core
+sudo reboot
+
+sudo ln -s /var/lib/snapd/snap /snap
+snap install --classic certbot
+touch /opt/letsencryptCA
+
+# создать файл сертификата по инструкции: https://help.socialit.ru/knowledge_base/articles/ustanovka-sertifikata-letsencrypt-na-zimbra-server-38
+
+certbot -d mo-mail.swifttechnical.ru -d autoconfig.swifttechnical.ru -d cab.swifttechnical.ru -d imap.swifttechnical.ru -d mail.swifttechnical.ru -d psnapi.swifttechnical.ru -d smtp.swifttechnical.ru -d pbm.swifttechnical.ru --manual --preferred-challenges dns certonly
+yum install bind-utils
+
+cp /etc/letsencrypt/live/mo-mail.swifttechnical.ru/privkey.pem /home/socialit/install_MyOffice_PSN/certificates/server.key
+cp /etc/letsencrypt/live/mo-mail.swifttechnical.ru/fullchain.pem /home/socialit/install_MyOffice_PSN/certificates/server.pem
+chmod 644 /home/socialit/install_MyOffice_PSN/certificates/server.key
+
+#права (не уверен, что это правильно)
+
+visudo
+i
+	# %wheel  ALL=(ALL)       ALL
+
+	## Same thing without a password
+	%wheel        ALL=(ALL:ALL)       NOPASSWD: ALL
+:wq!
+sudo usermod -aG wheel socialit
+
+#еще права (не уверен, что это правильно)
+
+ssh root@localhost
+yes
+ssh root@10.130.233.103
+yes
+mcedit /home/socialit/install_MyOffice_PSN/deploy_psn.sh
+добавить в конце "-v -u root"
+
+#DKIM (на хосте)
+
+openssl genrsa -out /home/socialit/install_MyOffice_PSN/certificates/dkim.key 1024
+openssl rsa -pubout -in /home/socialit/install_MyOffice_PSN/certificates/dkim.key -out /home/socialit/install_MyOffice_PSN/certificates/dkim.pem
+
+#DKIM (на DNS хостинге)
+_domainkey.mo-mail.swifttechnical.ru. TXT "v=DKIM1; k=rsa\; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCvMitsfpiAL0/UU1zHYDPkKyOyocJeCQW5FF8hl9jlfuZmHDgnWwrQWS85F60/Q4hfq5jcxUEprvIsWxU0SlolOcvCkEdscQsEdOCx4KMZvzK9pRWO/VL5tt0mP51uuOADQzQPWeCAdu/+a15HtL5cZOi8Jf8Y+klEvNGcVs5GvwIDAQAB"
+
+
+настроть инвентори файл
+
+#Деплой
+
+cd /home/socialit/install_MyOffice_PSN/
+./deploy_psn.sh hosts.yml -vvv
