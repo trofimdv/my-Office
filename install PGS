@@ -1,0 +1,112 @@
+sudo yum update
+
+снапшот
+
+#Отключение SELinux
+
+/etc/selinux/config
+SELINUX=permissive
+sudo shutdown -r now
+
+#MC
+
+yum install mc
+
+#Установка python3 (версии не ниже 3.6), python3pip
+
+sudo yum install epel-release -y
+sudo yum install python36 -y
+
+#Установка ansible 4.4
+
+pip3 install --upgrade pip
+logout
+python3 -m pip install --user ansible==4.4
+
+#Скачивание дистрибутива почты
+
+yum install wget
+wget --user=professional --password=yrn56iwn --no-check-certificate https://clients-distrs.myoffice.ru/professional/MyOffice_PGS_2.1.tgz
+mkdir install_MyOffice_PGS
+tar xvzf MyOffice_PGS_2.1.tgz -C install_MyOffice_PGS
+
+#Firewall
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+#ssh ключи
+
+ssh-keygen
+ssh-copy-id socialit@pgs.swifttechnical.ru
+ssh-copy-id root@pgs.swifttechnical.ru
+
+#ssl сертификаты
+
+sudo yum install epel-release
+sudo yum install snapd
+sudo systemctl enable --now snapd.socket
+sudo snap install core
+sudo reboot
+
+sudo ln -s /var/lib/snapd/snap /snap
+​sudo snap install --classic certbot
+touch /opt/letsencryptCA
+# создать файл сертификата по инструкции: https://help.socialit.ru/knowledge_base/articles/ustanovka-sertifikata-letsencrypt-na-zimbra-server-38
+
+certbot -d pgs.swifttechnical.ru -d admin.swifttechnical.ru --manual --preferred-challenges dns certonly
+
+cp /etc/letsencrypt/live/pgs.swifttechnical.ru/privkey.pem /opt/install_MyOffice_PGS/certificates/server.key
+cp /etc/letsencrypt/live/pgs.swifttechnical.ru/fullchain.pem /opt/install_MyOffice_PGS/certificates/server.pem
+sudo chmod 644 /opt/install_MyOffice_PGS/certificates/server.key
+
+#права (не уверен, что это правильно)
+
+visudo
+i
+	# %wheel  ALL=(ALL)       ALL
+
+	## Same thing without a password
+	%wheel        ALL=(ALL:ALL)       NOPASSWD: ALL
+:wq!
+usermod -aG wheel socialit
+
+#еще права (не уверен, что это правильно)
+
+ssh root@localhost
+yes
+ssh root@10.130.233.103
+yes
+mcedit /opt/install_MyOffice_PGS/deploy.sh
+добавить в конце "-u root"
+
+#проверить /etc/hosts
+
+10.130.233.150	pgs.swifttechnical.ru
+10.130.233.150	admin.swifttechnical.ru
+
+#отредактировать конфиг /opt/install_MyOffice_PGS/inventory/hosts-sa.yaml
+
+openssl passwd -apr1 "KEJ!ZQy6"
+
+#отредактировать roles/pgs-stack/tasks/migrations.yaml
+
+перед строкой - name: "[migration] tenant quota migration" нужно добавить:
+
+- name: Wait for Container to Go Up
+  wait_for:
+    timeout: 60
+
+увеличить параметры retries и delay:
+
+action: shell docker ps -f name=pgs_aristoteles
+delegate_to: "{{ groups['pythagoras'][0] }}"
+register: result
+until: result.stdout.find("pgs_aristoteles") != -1
+retries: 150
+delay: 100
+
+#Деплой
+
+cd /opt/install_MyOffice_PGS/
+./deploy.sh hosts-sa.yaml
