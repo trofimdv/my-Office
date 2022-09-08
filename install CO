@@ -52,7 +52,7 @@ pip install -U Jinja2
 pip3 install -r /opt/install_MyOffice_CO/requirements.txt
 
 standalone.yml изменил co.swifttechniсal.ru:
-добавить в конце "-u root" в деплое
+добавить в конце -u root в деплое
 
 
 
