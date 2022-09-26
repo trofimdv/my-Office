@@ -1,0 +1,5 @@
+Dkim
+Перед deploy VA необходимо поместить закрытую часть Dkim в дирректорию /root/install_psn/certificates/ на сервере PGS
+На хостинке создать TXT запись:
+mail._domainkey.swifttechnical.ru.    360    IN    TXT    "v=DKIM1; k=rsa;"    "p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyZwx37e/mwsqAkin4CX/wDJzGS175MEywcMAEiTzf5Rc++W4YmVIvKNZAxOuJtEaO+Ol2QyWQrsgR2WIIpcMnY64kQpZXfYsnS9l1kNvn90w7QWQ9ox5FVcurmn+DZf+hgtR2ZW3F9xQD1H4Sgzt61OGo+W7bRK7Ks9ZqCV/nbPztl5L1j68H9nUxmhv6xM41z5lps0WV64czb"    "YRS+Pr81UhRnEnEa0Pax+8wjw/JaxZc7seG8gRJYaTWB+6USgDcgw/rz5C81/YPRxdKcpMxNsWKwiew70yRG9hoOFgftUgJYqEYFfdJB5Vcy2WKX+ec1AJfE1WoLpjPmK5sx1icQIDAQAB"
+----------------------------------------------------------------------------------------------------------------
