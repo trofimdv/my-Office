@@ -56,28 +56,6 @@ standalone.yml изменил co.swifttechniсal.ru:
 
 
 
-
-
-
-
-
-#пока не булду делать
-#sudo nano  ./arp_announce
-#2
-#sudo nano ./arp_ignore
-#1
-
-
-
-
-
-
-
-
-
-
-
-
 #ssl сертификаты
 sudo yum install epel-release
 sudo yum install snapd
