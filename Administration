@@ -47,3 +47,6 @@ curl -X GET http://127.0.0.1:8852/tenants/default/quota -H 'accept: application/
 # изменить квоту тенанта default (размер общего хранилища на PGS)
 curl -X PUT http://127.0.0.1:8852/tenants/default/quota -d tenant_quota=20000000000  -H 'accept: application/json'
 ######################################################################################################################################################################
+# Работа в консоли с API (создание общих папок, пользователей и тд)
+# подключение к API
+curl -X POST "https://admin-mo.swifttechnical.ru:8850/adminapi/auth" -d "username=admin@mo.swifttechnical.ru" -d "password=3egCTj0OjXMaeQ"
